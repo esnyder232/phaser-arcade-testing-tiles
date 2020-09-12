@@ -18,10 +18,10 @@ export default class PlayerGroundAttackStrongState extends PlayerGroundBaseState
 		this.swingState = 0; //0 - swing up. 1 - action. 2 - swing down
 		this.animationDone = false;
 
-		this.hitboxOffsetx = 8 * this.player.sprite.scaleX;
-		this.hitboxOffsety = -6 * this.player.sprite.scaleY;
 		this.hitboxWidth = 18 * this.player.sprite.scaleX;
-		this.hitboxHeight = 22 * this.player.sprite.scaleY;
+		this.hitboxHeight = 26 * this.player.sprite.scaleY;
+		this.hitboxOffsetX = 8 * this.player.sprite.scaleX;
+		this.hitboxOffsetY = -2 * this.player.sprite.scaleY;
 	}
 
 	enter(timeElapsed, dt) {
@@ -29,8 +29,8 @@ export default class PlayerGroundAttackStrongState extends PlayerGroundBaseState
 		
 		this.player.sprite.anims.pause(this.player.sprite.anims.currentAnim.frames[this.currentAnimFrame]);
 		this.totalFrames = this.player.sprite.anims.getTotalFrames();
-
 		this.msPerFrame = this.totalDuration/this.totalFrames;
+		
 		super.enter(timeElapsed, dt);
 	}
 
@@ -68,6 +68,10 @@ export default class PlayerGroundAttackStrongState extends PlayerGroundBaseState
 				}
 				break;
 			case 1:
+				//make the hitbox follow the player
+				this.hitbox.x = this.player.sprite.x;
+				this.hitbox.y = this.player.sprite.y;
+				
 				//exit action
 				if(this.currentAnimFrame >= this.actionFrameEnd)
 				{
@@ -98,13 +102,12 @@ export default class PlayerGroundAttackStrongState extends PlayerGroundBaseState
 	}
 
 	createHitbox() {
-		const Bodies = Phaser.Physics.Matter.Matter.Bodies;
-		this.hitbox = this.scene.matter.add.image(this.player.sprite.x, this.player.sprite.y);
-		
-		var temp = Bodies.rectangle(this.player.sprite.x + this.hitboxOffsetx, this.player.sprite.y + this.hitboxOffsety, this.hitboxWidth, this.hitboxHeight);
-		temp.isSensor = true;
-		temp.ignoreGravity = true;
-		this.hitbox.setExistingBody(temp);
+		this.hitbox = this.scene.physics.add.image(this.player.sprite.x, this.player.sprite.y);
+		this.hitbox.body.allowGravity = false;
+		this.hitbox.body.setSize(this.hitboxWidth, this.hitboxHeight, true);
+		this.hitbox.body.setOffset(this.hitbox.body.offset.x + this.hitboxOffsetX, this.hitbox.body.offset.y + this.hitboxOffsetY);
+
+		this.globalfuncs.arcadeSpriteFix(this.hitbox);
 	}
 
 	deleteHitbox() {

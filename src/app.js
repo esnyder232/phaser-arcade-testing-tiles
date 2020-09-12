@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import GameManagerScene from './scenes/game-manager-scene.js'
-import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin"
 
 export default class App {
 	constructor() {
@@ -15,22 +14,16 @@ export default class App {
 			parent: 'game-div',
 			pixelArt: true,
 			physics: {
-				default: 'matter',				
-				matter: {
+				default: 'arcade',				
+				arcade: {
 					debug: true,
+					debugShowBody: true,
+					debugShowStaticBody: true,
+					debugShowVelocity: true,
 					gravity: {
-						y: 1
+						y: 300
 					}
 				}
-			},
-			plugins: {
-				scene: [
-					{
-						plugin: PhaserMatterCollisionPlugin,
-						key: "matterCollision",
-						mapping: "matterCollision"
-					}
-				]
 			},
 			scale: {
 				zoom:3
@@ -42,6 +35,11 @@ export default class App {
 	}	
 }
 
+
+
+
+
 //feels like a hacky way to start...oh well. Its simple atleast.
 var app = new App();
+
 

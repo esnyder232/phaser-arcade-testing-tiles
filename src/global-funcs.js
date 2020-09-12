@@ -62,4 +62,35 @@ export default class GlobalFuncs {
 			anims.create(animObject);
 		}
 	}
+
+	//9/10/2020 - This is to fix the arcade sprite when the sprite is created in the update function instead of the create function.
+	//This basically realligns the sprite body's hitbox so it doesn't get out of sync with the sprite game object.
+	//You only need to call this once, and only after you create the sprite with this.scene.add.sprite(...);
+	//This also works with images. 
+	//If you need to set the size, scale, and offset of the body on creation, do it after you create the sprite and THEN call this function.
+	/*Ex:
+		var s = this.scene.physics.add.sprite(50, 50, "spritesheethere", 0);
+
+		s.body.setOffset(5, 5);
+		s.setScale(2, 1);
+		s.body.setSize(10, 19, false);
+
+		arcadeSpriteFix(s);
+	*/
+	arcadeSpriteFix(arcadeSprite) {
+		var newx = arcadeSprite.x - (0.5 * arcadeSprite.displayWidth) + (arcadeSprite.scaleX * arcadeSprite.body.offset.x);
+		var newy = arcadeSprite.y - (0.5 * arcadeSprite.displayHeight) + (arcadeSprite.scaleY * arcadeSprite.body.offset.y);
+
+		arcadeSprite.body.position.x = newx;
+		arcadeSprite.body.position.y = newy;
+		arcadeSprite.body.prev.x = newx;
+		arcadeSprite.body.prev.y = newy;
+		arcadeSprite.body.prevFrame.x = newx;
+		arcadeSprite.body.prevFrame.y = newy;
+		arcadeSprite.body.transform.scaleX = arcadeSprite.scaleX;
+		arcadeSprite.body.transform.scaleY = arcadeSprite.scaleY;
+		arcadeSprite.body.width = Math.floor(arcadeSprite.body.width * arcadeSprite.scaleX);
+		arcadeSprite.body.height = Math.floor(arcadeSprite.body.height * arcadeSprite.scaleY);
+	}
+
 }

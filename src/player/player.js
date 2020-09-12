@@ -29,9 +29,6 @@ export default class Player {
 			select: 'select'
 		};
 
-		//keyboard controls to poll from if needed
-		this.keyboardControls = {};
-
 		//The actual controller used to control the player.
 		this.playerController = {};
 
@@ -40,42 +37,20 @@ export default class Player {
 		this.walkSpeed = 64;
 		this.state = null; 
 		this.nextState = null;
-
-		//main body
-		this.mainBody = {
-			isColliding: false,
-			body: null,
-			unregisterFunctions: [],
-			arrBodiesColliding: [], //currently colliding bodies
-			arrPairs: []
-		};
-
-		//the bottom sensor used to tell if the sprite is on the ground or not
-		this.botSensor = {
-			isColliding: false,
-			body: null,
-			unregisterFunctions: [],
-			arrBodiesColliding: [] //currently colliding bodies
-		};
-
-
+	
 	}
 
 	create() {
-		//aliases
-		const {Body, Bodies} = Phaser.Physics.Matter.Matter;
-
 		//create animations
 		this.globalfuncs.createSceneAnimsFromAseprite(this.scene, "slime", "slime-json");
 
-		//create matter sprite
-		var xPos = 186;
-		var yPos = -70;
-		var hitboxWidth = 10;
-		var hitboxHeight = 10;
+		//create sprite
+		var xPos = 180;
+		var yPos = 40;
 
-		this.sprite = this.scene.matter.add.sprite(xPos, yPos, "slime", 0);
+		this.sprite = this.scene.physics.add.sprite(xPos, yPos, "slime", 0);
 		this.sprite.label = "player";
+		this.sprite.setScale(2, 2);
 		
 		//controls
 		//create a virtual button for the playerController
@@ -111,71 +86,40 @@ export default class Player {
 			this.scene.input.keyboard.on("keydown-"+this.playerController[key].phaserKeyCode, this.tempDown, this.playerController[key]);
 			this.scene.input.keyboard.on("keyup-"+this.playerController[key].phaserKeyCode, this.tempUp, this.playerController[key]);
 		}
-		console.log(this.sprite);
-
 
 		//initial state
 		this.state = new PlayerGroundIdleState(this.scene, this);
 		this.state.enter();
 
-		//collision
-		var sensorThickness = 4;
-		var top = yPos - (hitboxHeight/2);
-		var bot = yPos + (hitboxHeight/2);
-		var left = xPos - (hitboxWidth/2);
-		var right = xPos + (hitboxWidth/2);
+		//main body collision
+		this.sprite.body.setSize(12, 12)
+		this.sprite.body.setOffset(26, 28);
+		this.scene.physics.add.collider(this.sprite, this.scene.layer1);
 
-		this.mainBody.body = Bodies.rectangle(xPos, yPos, hitboxWidth, hitboxHeight);
-		this.botSensor.body = Bodies.rectangle(xPos, bot, hitboxWidth, sensorThickness, {isSensor: true});
-
-		this.compoundBody = Body.create({
-			parts: [this.mainBody.body, this.botSensor.body],
-			frictionStatic: 0.1,
-			frictionAir: 0,
-			friction: 0.1
-		});
-
-		this.sprite.setExistingBody(this.compoundBody);
-
-
-		//main body
-		this.mainBody.unregisterFunctions.push(this.scene.matterCollision.addOnCollideStart({
-			objectA: this.mainBody.body,
-			callback: this.onCollideMainBodyStart,
-			context: this
-		}));
-
-		this.mainBody.unregisterFunctions.push(this.scene.matterCollision.addOnCollideEnd({
-			objectA: this.mainBody.body,
-			callback: this.onCollideMainBodyEnd,
-			context: this
-		}));
-
-		//bot sensor
-		this.botSensor.unregisterFunctions.push(this.scene.matterCollision.addOnCollideStart({
-			objectA: this.botSensor.body,
-			callback: this.onCollideBotSensorStart,
-			context: this
-		}));
-
-		this.botSensor.unregisterFunctions.push(this.scene.matterCollision.addOnCollideEnd({
-			objectA: this.botSensor.body,
-			callback: this.onCollideBotSensorEnd,
-			context: this
-		}));
-
-
-
-		this.sprite.setScale(2, 2);
-		this.sprite.setFixedRotation();
-		this.sprite.setOrigin(0.5, 0.55); //adjust the sprite drawing location a little up so it fits with the rectangle hit box
-		this.sprite.setPosition(xPos, yPos);
-
-
-		console.log(this);
-
+		//other physics stuff
+		this.sprite.setDrag(0, 0);
 		this.frameNum = 0;
 		
+		console.log(this);
+	}
+
+	myEnable() {
+		console.log('myEnable called');
+		this.hitbox.setActive(true);
+		this.hitbox.enable = true;
+		this.hitbox.setVisible(true);
+		this.hitbox.body.setEnable(true);
+		this.hitbox.body.debugShowBody = true;
+	}
+
+	myDisable() {
+		console.log(this);
+		console.log('myDisable called');
+		this.hitbox.setActive(false);
+		this.hitbox.enable = false;
+		this.hitbox.setVisible(false);
+		this.hitbox.body.setEnable(false);
+		this.hitbox.body.debugShowBody = false;
 	}
 
 	onCollideBotSensorStart(e) {
@@ -269,12 +213,10 @@ export default class Player {
 		// 		console.log(this.mainBody.arrBodiesColliding[i]);
 		// 		console.log(this.mainBody.arrPairs[i]);
 		// 	}
+	}
 
-			
-
-		// 	//console.log(this);
-		// 	this.scene.scene.pause(this.scene.scene.key);
-		// 	//this.breakit = a + b;
-		// }
+	postUpdate(timeElapsed, dt) {
+		console.log('player post update');
 	}
 }
+

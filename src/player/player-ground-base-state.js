@@ -13,10 +13,10 @@ export default class PlayerGroundBaseState extends PlayerBaseState {
 	update(timeElapsed, dt) {
 		
 		//transfer to in air state
-		if(!this.player.botSensor.isColliding)
-		{
-			this.player.nextState = new PlayerAirAllState(this.scene, this.player);
-		}
+		// if(!this.player.botSensor.isColliding)
+		// {
+		// 	this.player.nextState = new PlayerAirAllState(this.scene, this.player);
+		// }
 
 		super.update(timeElapsed, dt);
 	}
