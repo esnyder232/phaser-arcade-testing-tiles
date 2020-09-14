@@ -35,18 +35,120 @@ export default class Player {
 
 		//other variables
 		this.debugCounter = 0;
-		this.walkSpeed = 64;
+
 		this.state = null; 
 		this.nextState = null;
+
+
+
+		//player physics variables
+		this.moveVelTarget = 0;
+		this.moveHysteresis = 0.5;
+		this.moveVelVector = {
+			x: 0,
+			y: 0
+		};
+		this.physVelVectorFinal = {
+			x: 0,
+			y: 0
+		}
+		this.moveAccMagnitude = 50;
+		this.moveFrictionCoeff = 0.1;
+		
 	}
+
+
+	//this is a seperate function that is called by player states, and we may not want to ALWAYS call it (for example, if the player is damaged, we do not want to call the normal physics)	
+	applyPlayerPhysics(dt)
+	{
+
+
+		/////////////////////////////////////////////
+		//calculate movement acceleration and speed//
+		var lowerBound = this.moveVelTarget - this.moveHysteresis;
+		var upperBound = this.moveVelTarget + this.moveHysteresis;
+
+		//determine if the player is within the target + hysteresis. If it is, snap the speed to the target.
+		if(this.moveVelVector.x >= lowerBound && this.moveVelVector.x <= upperBound)
+		{
+			this.moveVelVector.x = this.moveVelTarget;
+		}
+		//apply acceleration to the direction of the target
+		else
+		{
+			var accDirection = (this.moveVelTarget - this.moveVelVector.x) >= 0 ? 1 : -1;
+			var velToAdd = (this.moveAccMagnitude * accDirection * this.moveFrictionCoeff) * dt/1000;
+			var velPrediction = this.moveVelVector.x + velToAdd;
+
+			//if the acceleration would cause the velocity to overshoot, snap velocity to the target
+			if((accDirection > 0 && velPrediction >= lowerBound) || 
+				(accDirection < 0 && velPrediction <= upperBound))
+			{
+				this.moveVelVector.x = this.moveVelTarget;
+			}
+			//if it undershoots, add acceleration like normal
+			else
+			{
+				this.moveVelVector.x += velToAdd;
+			}
+		}
+		
+		this.physVelVectorFinal.x = this.moveVelVector.x;
+
+		//apply velocities to rigid body
+		//rb.velocity = physVelVectorFinal;
+
+
+
+
+
+		//original
+		// /////////////////////////////////////////////
+		// //calculate movement acceleration and speed//
+		// var lowerBound = moveVelTarget - moveHysteresis;
+		// var upperBound = moveVelTarget + moveHysteresis;
+		
+		// //determine if the player is within the target + hysteresis. If it is, snap the speed to the target.
+		// if(moveVelVector.x >= lowerBound && moveVelVector.x <= upperBound)
+		// {
+		// 	moveVelVector.x = moveVelTarget;
+		// }
+		// //apply acceleration to the direction of the target
+		// else
+		// {
+		// 	var accDirection = (moveVelTarget - moveVelVector.x) >= 0 ? 1 : -1;
+		// 	var velToAdd = (moveAccMagnitude * accDirection * moveFrictionCoeff) * dt;
+		// 	var velPrediction = moveVelVector.x + velToAdd;
+
+		// 	//if the acceleration would cause the velocity to overshoot, snap velocity to the target
+		// 	if((accDirection > 0 && velPrediction >= lowerBound) || 
+		// 		(accDirection < 0 && velPrediction <= upperBound))
+		// 	{
+		// 		moveVelVector.x = moveVelTarget;
+		// 	}
+		// 	//if it undershoots, add acceleration like normal
+		// 	else
+		// 	{
+		// 		moveVelVector.x += velToAdd;
+		// 	}
+		// }
+		
+		// physVelVectorFinal.x = moveVelVector.x;
+		// physVelVectorFinal.y = rb.velocity.y;
+
+		// //apply velocities to rigid body
+		// rb.velocity = physVelVectorFinal;
+	}
+
+
 
 	create() {
 		//create animations
 		this.globalfuncs.createSceneAnimsFromAseprite(this.scene, "slime", "slime-json");
 
 		//create sprite
-		var xPos = 185;
-		var yPos = 0;
+		var xPos = 175;
+		var yPos = 80;
 
 		this.sprite = this.scene.physics.add.sprite(xPos, yPos, "slime", 0);
 		this.sprite.label = "player";
@@ -116,6 +218,30 @@ export default class Player {
 
 	update(timeElapsed, dt) {
 		this.frameNum++;
+
+		//testing a movement bug
+		// if(this.frameNum == 5)
+		// {
+		// 	this.playerController.jump.state = true;
+		// }
+		// else if(this.frameNum == 46)
+		// {
+		// 	//this.scene.scene.pause(this.scene.scene.key);
+		// 	this.playerController.right.state = true;
+		// }
+		// else if(this.frameNum == 49)
+		// {
+		// 	//this.scene.scene.pause(this.scene.scene.key);
+		// 	this.playerController.right.state = false;
+		// }
+		// else if(this.frameNum == 70)
+		// {
+		// 	console.log('PAUSSSEE');
+		// 	//this.scene.scene.pause(this.scene.scene.key);
+		// 	console.log("jump state: state: %s, prevState: %s", this.playerController.jump.state, this.playerController.jump.prevState);
+		// }
+		
+
 		this.state.update(timeElapsed, dt);
 
 		//temporary for testing damage state. Press start to go into damage state.
@@ -124,12 +250,23 @@ export default class Player {
 			this.nextState = new PlayerDamagedBaseState(this.scene, this);
 		}
 
-		// if(this.frameNum >= 40)
+
+
+
+
+		//tsting physics - it works!
+		// if(this.frameNum == 10)
 		// {
-		// 	console.log('PAUSSSEE');
-		// 	this.scene.scene.pause(this.scene.scene.key);
+		// 	this.moveVelTarget = 10;
 		// }
-		
+		// else if(this.frameNum == 100)
+		// {
+		// 	this.moveVelTarget = 0;
+		// }
+		// this.applyPlayerPhysics(dt);
+		// console.log("FRAMENUM: %s - physVelVectorFinal.x: %s", this.frameNum, this.physVelVectorFinal.x);
+
+
 		//update the prevState on the virtual controller for the player
 		for(var key in this.playerController)
 		{
