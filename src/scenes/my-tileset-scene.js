@@ -1,5 +1,6 @@
 import GlobalFuncs from "../global-funcs.js"
 import Player from "../player/player.js"
+import Box from "../box/box.js"
 
 export default class MyTilesetScene extends Phaser.Scene {
 	constructor(config) {
@@ -7,6 +8,7 @@ export default class MyTilesetScene extends Phaser.Scene {
 
 		this.globalfuncs = new GlobalFuncs();
 		this.player = new Player(this);
+		this.box = new Box(this);
 	}
 
 	init() {
@@ -20,6 +22,10 @@ export default class MyTilesetScene extends Phaser.Scene {
 
 		this.load.spritesheet("slime", "assets/spritesheets/slime.png", {frameWidth: 64, frameHeight: 64});
 		this.load.json("slime-json", "assets/spritesheets/slime.json");
+
+
+		this.load.spritesheet("box", "assets/spritesheets/box.png", {frameWidth: 32, frameHeight: 32});
+		this.load.json("box-json", "assets/spritesheets/box.json");
 	}
 	  
 	create() {
@@ -39,6 +45,7 @@ export default class MyTilesetScene extends Phaser.Scene {
 
 		//create layers
 		this.layer1 = this.map.createStaticLayer("Tile Layer 1", this.tileset, 0, 0);
+		//this.layer2 = this.map.createStaticLayer("Tile Layer 2", this.tileset, 0, 0);
 
 		//set collision for tile layer
 		this.layer1.setCollisionByProperty({collides: true});
@@ -48,11 +55,20 @@ export default class MyTilesetScene extends Phaser.Scene {
 
 
 		///////////////////////////
+		// create box
+		///////////////////////////
+		this.box.create();
+
+		//spawn some boxes
+		// this.box.spawn(180, 50);
+		// this.box.spawn(210, 50);
+
+
+
+		///////////////////////////
 		// create player
 		///////////////////////////
-		this.hitboxGroup = this.physics.add.group();
 		this.player.create();
-
 
 
 		///////////////////////////

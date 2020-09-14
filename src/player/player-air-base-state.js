@@ -12,7 +12,7 @@ export default class PlayerAirBaseState extends PlayerBaseState {
 
 	update(timeElapsed, dt) {
 		//transfer to on ground state
-		if(this.player.botSensor.isColliding)
+		if(this.player.sprite.body.blocked.down)
 		{
 			this.player.nextState = new PlayerGroundIdleState(this.scene, this.player);
 		}
@@ -20,8 +20,7 @@ export default class PlayerAirBaseState extends PlayerBaseState {
 		//add jump force
 		if(this.player.playerController.jump.state && !this.player.playerController.jump.prevState)
 		{
-			this.player.sprite.setVelocityY(0);
-			this.player.sprite.applyForce({x: 0, y: -0.01});
+			this.player.applyJumpForce();
 		}
 		
 		super.update(timeElapsed, dt);

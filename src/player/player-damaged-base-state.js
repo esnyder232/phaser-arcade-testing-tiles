@@ -10,7 +10,17 @@ export default class PlayerDamagedBaseState extends PlayerBaseState {
 
 	enter(timeElapsed, dt) {
 		this.player.sprite.setTint(0xff0000);
-		this.player.sprite.applyForce({x: 0.01, y: -0.01});
+
+		//play damaged animation here
+		
+		//temporary. Just judging direction based on sprite direction.
+		var xDir = -1;
+		if(this.player.sprite.flipX)
+		{
+			xDir = 1;
+		}
+
+		this.player.applyDamageForce(xDir);
 		super.enter(timeElapsed, dt);
 	}
 

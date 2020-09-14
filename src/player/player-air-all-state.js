@@ -16,12 +16,12 @@ export default class PlayerAirAllState extends PlayerAirBaseState {
 		if(this.player.playerController.right.state)
 		{
 			this.player.sprite.flipX = false;
-			this.player.sprite.setVelocityX(this.player.walkSpeed * (dt/1000));
+			this.player.applyWalkForce(1);
 		}
 		else if(this.player.playerController.left.state)
 		{
 			this.player.sprite.flipX = true;
-			this.player.sprite.setVelocityX(-1 * this.player.walkSpeed * (dt/1000));
+			this.player.applyWalkForce(-1);
 		}
 		else
 		{

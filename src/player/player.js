@@ -1,5 +1,6 @@
 import GlobalFuncs from "../global-funcs.js"
 import PlayerGroundIdleState from "./player-ground-idle-state.js";
+import PlayerDamagedBaseState from "./player-damaged-base-state.js";
 
 //the player class
 export default class Player {
@@ -37,7 +38,6 @@ export default class Player {
 		this.walkSpeed = 64;
 		this.state = null; 
 		this.nextState = null;
-	
 	}
 
 	create() {
@@ -45,8 +45,8 @@ export default class Player {
 		this.globalfuncs.createSceneAnimsFromAseprite(this.scene, "slime", "slime-json");
 
 		//create sprite
-		var xPos = 180;
-		var yPos = 40;
+		var xPos = 185;
+		var yPos = 0;
 
 		this.sprite = this.scene.physics.add.sprite(xPos, yPos, "slime", 0);
 		this.sprite.label = "player";
@@ -94,84 +94,14 @@ export default class Player {
 		//main body collision
 		this.sprite.body.setSize(12, 12)
 		this.sprite.body.setOffset(26, 28);
-		this.scene.physics.add.collider(this.sprite, this.scene.layer1);
+		this.scene.physics.add.collider(this.sprite, this.scene.layer1);		
+		this.scene.physics.add.collider(this.sprite, this.scene.box.group, this.onCollideBox, null, this);
 
 		//other physics stuff
 		this.sprite.setDrag(0, 0);
 		this.frameNum = 0;
 		
 		console.log(this);
-	}
-
-	myEnable() {
-		console.log('myEnable called');
-		this.hitbox.setActive(true);
-		this.hitbox.enable = true;
-		this.hitbox.setVisible(true);
-		this.hitbox.body.setEnable(true);
-		this.hitbox.body.debugShowBody = true;
-	}
-
-	myDisable() {
-		console.log(this);
-		console.log('myDisable called');
-		this.hitbox.setActive(false);
-		this.hitbox.enable = false;
-		this.hitbox.setVisible(false);
-		this.hitbox.body.setEnable(false);
-		this.hitbox.body.debugShowBody = false;
-	}
-
-	onCollideBotSensorStart(e) {
-		this.botSensor.arrBodiesColliding.push(e.bodyB);
-		this.botSensor.isColliding = true;
-	}
-
-	
-	onCollideBotSensorEnd(e) {
-		var objIndex = this.botSensor.arrBodiesColliding.findIndex((x) => {return x === e.bodyB;});
-		if(objIndex >= 0)
-		{
-			this.botSensor.arrBodiesColliding.splice(objIndex, 1);
-		}
-
-		if(this.botSensor.arrBodiesColliding.length > 0)
-		{
-			this.botSensor.isColliding = true;
-		}
-		else
-		{
-			this.botSensor.isColliding = false;
-		}
-	}
-
-
-	
-	onCollideMainBodyStart(e) {
-		// console.log('main body collide');
-		// console.log(e);
-		this.mainBody.arrBodiesColliding.push(e.bodyB);
-		this.mainBody.isColliding = true;
-		this.mainBody.arrPairs.push(e.pair);
-	}
-
-	
-	onCollideMainBodyEnd(e) {
-		var objIndex = this.mainBody.arrBodiesColliding.findIndex((x) => {return x === e.bodyB;});
-		if(objIndex >= 0)
-		{
-			this.mainBody.arrBodiesColliding.splice(objIndex, 1);
-		}
-
-		if(this.mainBody.arrBodiesColliding.length > 0)
-		{
-			this.mainBody.isColliding = true;
-		}
-		else
-		{
-			this.mainBody.isColliding = false;
-		}
-		
 	}
 
 	
@@ -187,6 +117,18 @@ export default class Player {
 	update(timeElapsed, dt) {
 		this.frameNum++;
 		this.state.update(timeElapsed, dt);
+
+		//temporary for testing damage state. Press start to go into damage state.
+		if(this.playerController.start.state && !this.playerController.start.prevState)
+		{
+			this.nextState = new PlayerDamagedBaseState(this.scene, this);
+		}
+
+		// if(this.frameNum >= 40)
+		// {
+		// 	console.log('PAUSSSEE');
+		// 	this.scene.scene.pause(this.scene.scene.key);
+		// }
 		
 		//update the prevState on the virtual controller for the player
 		for(var key in this.playerController)
@@ -203,16 +145,18 @@ export default class Player {
 			this.state = this.nextState;
 			this.nextState = null;
 		}
+	}
 
-		
-		// if(this.mainBody.isColliding || this.frameNum >= 35)
-		// {
-		// 	console.log(this.frameNum + ", " + this.mainBody.isColliding + ", " + this.mainBody.body.position.x + ", " + this.mainBody.arrBodiesColliding.length);
-		// 	for(var i = 0; i < this.mainBody.arrBodiesColliding.length; i++)
-		// 	{
-		// 		console.log(this.mainBody.arrBodiesColliding[i]);
-		// 		console.log(this.mainBody.arrPairs[i]);
-		// 	}
+	applyJumpForce() {
+		this.sprite.body.setVelocityY(-100);
+	}
+
+	applyWalkForce(xDir) {
+		this.sprite.body.setVelocityX(xDir * this.walkSpeed);
+	}
+
+	applyDamageForce(xDir) {
+		this.sprite.body.setVelocity(xDir * 100, -100);
 	}
 
 	postUpdate(timeElapsed, dt) {

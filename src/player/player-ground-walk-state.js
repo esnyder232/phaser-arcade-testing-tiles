@@ -20,13 +20,13 @@ export default class PlayerGroundWalkState extends PlayerGroundBaseState {
 		if(this.player.playerController.right.state)
 		{
 			this.player.sprite.flipX = false;
-			this.player.sprite.setVelocityX(this.player.walkSpeed);
+			this.player.applyWalkForce(1);
 		}
 		//walk left
 		else if(this.player.playerController.left.state)
 		{
 			this.player.sprite.flipX = true;
-			this.player.sprite.setVelocityX(-1 * this.player.walkSpeed);
+			this.player.applyWalkForce(-1);
 		}
 		//idle
 		else
@@ -38,7 +38,7 @@ export default class PlayerGroundWalkState extends PlayerGroundBaseState {
 		//add jump force
 		if(this.player.playerController.jump.state && !this.player.playerController.jump.prevState)
 		{
-			this.player.sprite.setVelocityY(-100);
+			this.player.applyJumpForce();
 		}
 
 		//attacks

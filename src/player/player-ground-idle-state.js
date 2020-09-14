@@ -25,7 +25,7 @@ export default class PlayerGroundIdleState extends PlayerGroundBaseState {
 		//add jump force
 		if(this.player.playerController.jump.state && !this.player.playerController.jump.prevState)
 		{
-			this.player.sprite.setVelocityY(-100);
+			this.player.applyJumpForce();
 		}
 
 		//attacks
