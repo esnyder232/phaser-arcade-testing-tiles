@@ -39,6 +39,7 @@ export default class Player {
 		this.state = null; 
 		this.nextState = null;
 
+		this.walkSpeed = 100;
 
 
 		//player physics variables
